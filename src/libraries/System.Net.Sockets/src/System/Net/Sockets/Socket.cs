@@ -1812,6 +1812,72 @@ namespace System.Net.Sockets
                 }
                 SetIPv6MulticastOption(optionName, multicastOption);
             }
+            else if (optionLevel == SocketOptionLevel.IP && (optionName == SocketOptionName.AddSourceMembership || optionName == SocketOptionName.DropSourceMembership))
+            {
+                SourceMulticastOption multicastOption = optionValue as SourceMulticastOption;
+                if (multicastOption == null)
+                {
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "SourceMulticastOption"), nameof(optionValue));
+                }
+
+                SetSourceMulticastOption(optionName, multicastOption);
+            }
+            else if (optionLevel == SocketOptionLevel.IPv6 && (optionName == SocketOptionName.AddSourceMembership || optionName == SocketOptionName.DropSourceMembership))
+            {
+                SourceMulticastOption multicastOption = optionValue as SourceMulticastOption;
+                if (multicastOption == null)
+                {
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "SourceMulticastOption"), nameof(optionValue));
+                }
+
+                SetIPv6SourceMulticastOption(optionName, multicastOption);
+            }
+            else if (optionLevel == SocketOptionLevel.IP && (optionName == SocketOptionName.McastJoinGroup || optionName == SocketOptionName.McastLeaveGroup))
+            {
+                MulticastOption multicastOption = optionValue as MulticastOption;
+                if (multicastOption == null)
+                {
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "MulticastOption"), nameof(optionValue));
+                }
+
+                SetMulticastGroupOption(optionName, multicastOption);
+            }
+            else if (optionLevel == SocketOptionLevel.IPv6 && (optionName == SocketOptionName.McastJoinGroup || optionName == SocketOptionName.McastLeaveGroup))
+            {
+                IPv6MulticastOption multicastOption = optionValue as IPv6MulticastOption;
+                if (multicastOption == null)
+                {
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "IPv6MulticastOption"), nameof(optionValue));
+                }
+
+                SetIPv6MulticastGroupOption(optionName, multicastOption);
+            }
+            else if (optionLevel == SocketOptionLevel.IP
+                && (optionName == SocketOptionName.McastJoinSourceGroup
+                    || optionName == SocketOptionName.McastLeaveSourceGroup
+                    || optionName == SocketOptionName.McastBlockSource
+                    || optionName == SocketOptionName.McastUnblockSource))
+            {
+                SourceMulticastOption multicastOption = optionValue as SourceMulticastOption;
+                if (multicastOption == null)
+                {
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "SourceMulticastOption"), nameof(optionValue));
+                }
+                SetSourceMulticastGroupOption(optionName, multicastOption);
+            }
+            else if (optionLevel == SocketOptionLevel.IPv6
+                && (optionName == SocketOptionName.McastJoinSourceGroup
+                    || optionName == SocketOptionName.McastLeaveSourceGroup
+                    || optionName == SocketOptionName.McastBlockSource
+                    || optionName == SocketOptionName.McastUnblockSource))
+            {
+                SourceMulticastOption multicastOption = optionValue as SourceMulticastOption;
+                if (multicastOption == null)
+                {
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "SourceMulticastOption"), nameof(optionValue));
+                }
+                SetIPv6SourceMulticastGroupOption(optionName, multicastOption);
+            }
             else
             {
                 throw new ArgumentException(SR.net_sockets_invalid_optionValue_all, nameof(optionValue));
@@ -4579,6 +4645,129 @@ namespace System.Net.Sockets
             SocketError errorCode = SocketPal.SetIPv6MulticastOption(_handle, optionName, MR);
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SetIPv6MulticastOption returns errorCode:{errorCode}");
+
+            // Throw an appropriate SocketException if the native call fails.
+            if (errorCode != SocketError.Success)
+            {
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
+            }
+        }
+
+        // IP setsockopt for source specific multicast requests.
+        private void SetSourceMulticastOption(SocketOptionName optionName, SourceMulticastOption MR)
+        {
+            SocketError errorCode;
+
+            SocketOptionName protocolIndependentOptionName = ConvertProtocolDependentOptionNameToProtocolImdependent(optionName);
+            errorCode = SocketPal.SetIPSourceMulticastGroupOption(_handle, protocolIndependentOptionName, MR);
+
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Info(this, $"Interop.Winsock.setsockopt returns errorCode:{errorCode}");
+
+            // Throw an appropriate SocketException if the native call fails.
+            if (errorCode != SocketError.Success)
+            {
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
+            }
+        }
+
+        // IPv6 setsockopt for source specific multicast requests.
+        private void SetIPv6SourceMulticastOption(SocketOptionName optionName, SourceMulticastOption MR)
+        {
+            SocketError errorCode;
+
+            SocketOptionName protocolIndependentOptionName = ConvertProtocolDependentOptionNameToProtocolImdependent(optionName);
+            errorCode = SocketPal.SetIPv6SourceMulticastGroupOption(_handle, protocolIndependentOptionName, MR);
+
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Info(this, $"Interop.Winsock.setsockopt returns errorCode:{errorCode}");
+
+            // Throw an appropriate SocketException if the native call fails.
+            if (errorCode != SocketError.Success)
+            {
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
+            }
+        }
+
+        private static SocketOptionName ConvertProtocolDependentOptionNameToProtocolImdependent(SocketOptionName optionName)
+        {
+            switch (optionName)
+            {
+                case SocketOptionName.AddMembership:
+                    return SocketOptionName.McastJoinGroup;
+                case SocketOptionName.DropMembership:
+                    return SocketOptionName.McastLeaveGroup;
+                case SocketOptionName.AddSourceMembership:
+                    return SocketOptionName.McastJoinSourceGroup;
+                case SocketOptionName.DropSourceMembership:
+                    return SocketOptionName.McastLeaveSourceGroup;
+                case SocketOptionName.BlockSource:
+                    return SocketOptionName.McastBlockSource;
+                case SocketOptionName.UnblockSource:
+                    return SocketOptionName.McastUnblockSource;
+                default:
+                    throw new ArgumentException($"Unexpected optionName={optionName}");
+            }
+        }
+
+        // IP setsockopt for multicast group requests.
+        private void SetMulticastGroupOption(SocketOptionName optionName, MulticastOption MR)
+        {
+            SocketError errorCode;
+
+            errorCode = SocketPal.SetIPMulticastGroupOption(_handle, optionName, MR);
+
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.setsockopt returns errorCode:{errorCode}");
+
+            // Throw an appropriate SocketException if the native call fails.
+            if (errorCode != SocketError.Success)
+            {
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
+            }
+        }
+
+        // IPv6 setsockopt for multicast group requests.
+        private void SetIPv6MulticastGroupOption(SocketOptionName optionName, IPv6MulticastOption MR)
+        {
+            SocketError errorCode;
+
+            errorCode = SocketPal.SetIPv6MulticastGroupOption(_handle, optionName, MR);
+
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.setsockopt returns errorCode:{errorCode}");
+
+            // Throw an appropriate SocketException if the native call fails.
+            if (errorCode != SocketError.Success)
+            {
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
+            }
+        }
+
+        // IP setsockopt for source specific multicast requests.
+        private void SetSourceMulticastGroupOption(SocketOptionName optionName, SourceMulticastOption MR)
+        {
+            SocketError errorCode;
+
+            errorCode = SocketPal.SetIPSourceMulticastGroupOption(_handle, optionName, MR);
+
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Info(this, $"Interop.Winsock.setsockopt returns errorCode:{errorCode}");
+
+            // Throw an appropriate SocketException if the native call fails.
+            if (errorCode != SocketError.Success)
+            {
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
+            }
+        }
+
+        // IPv6 setsockopt for source specific multicast requests.
+        private void SetIPv6SourceMulticastGroupOption(SocketOptionName optionName, SourceMulticastOption MR)
+        {
+            SocketError errorCode;
+
+            errorCode = SocketPal.SetIPv6SourceMulticastGroupOption(_handle, optionName, MR);
+
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Info(this, $"Interop.Winsock.setsockopt returns errorCode:{errorCode}");
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)

@@ -132,6 +132,26 @@ namespace System.Net.Sockets
         IPv6Only = 27,
         #endregion
 
+        #region SocketOptionLevel.IP or SocketOptionLevel.IPv6
+        // Join all sources for a group.
+        McastJoinGroup = 41,
+
+        // Drop all sources for a group.
+        McastLeaveGroup = 42,
+
+        // Block IP group/source.
+        McastBlockSource = 43,
+
+        // Unblock IP group/source.
+        McastUnblockSource = 44,
+
+        // Join IP group/source.
+        McastJoinSourceGroup = 45,
+
+        // Leave IP group/source.
+        McastLeaveSourceGroup = 46,
+        #endregion
+
         #region SocketOptionLevel.Tcp
         // Disables the Nagle algorithm for send coalescing.
         NoDelay = 1,

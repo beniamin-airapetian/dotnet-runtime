@@ -690,6 +690,80 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
+        public static SocketError SetIPMulticastGroupOption(SafeSocketHandle handle, SocketOptionName optionName, MulticastOption optionValue)
+        {
+            var ipmr = new Interop.Winsock.IPMulticastGroupRequest();
+
+            ipmr.MulticastAddress = new Interop.Winsock.SocketIPAddressStorage(optionValue.Group.GetAddressBytes());
+            ipmr.InterfaceIndex = unchecked((uint)optionValue.InterfaceIndex);
+
+            // This can throw ObjectDisposedException.
+            SocketError errorCode = Interop.Winsock.setsockopt(
+                handle,
+                SocketOptionLevel.IP,
+                optionName,
+                ref ipmr,
+                Interop.Winsock.IPMulticastGroupRequest.Size);
+
+            return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
+        }
+
+        public static SocketError SetIPv6MulticastGroupOption(SafeSocketHandle handle, SocketOptionName optionName, IPv6MulticastOption optionValue)
+        {
+            var ipmr = new Interop.Winsock.IPv6MulticastGroupRequest();
+
+            ipmr.MulticastAddress = new Interop.Winsock.SocketIPv6AddressStorage(optionValue.Group.GetAddressBytes());
+            ipmr.InterfaceIndex = unchecked((uint)optionValue.InterfaceIndex);
+
+            // This can throw ObjectDisposedException.
+            SocketError errorCode = Interop.Winsock.setsockopt(
+                handle,
+                SocketOptionLevel.IPv6,
+                optionName,
+                ref ipmr,
+                Interop.Winsock.IPv6MulticastGroupRequest.Size);
+
+            return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
+        }
+
+        public static SocketError SetIPSourceMulticastGroupOption(SafeSocketHandle handle, SocketOptionName optionName, SourceMulticastOption optionValue)
+        {
+            var ipmr = new Interop.Winsock.IPSourceMulticastRequest();
+
+            ipmr.MulticastAddress = new Interop.Winsock.SocketIPAddressStorage(optionValue.Group.GetAddressBytes());
+            ipmr.SourceAddress = new Interop.Winsock.SocketIPAddressStorage(optionValue.Source.GetAddressBytes());
+            ipmr.InterfaceIndex = unchecked((uint)optionValue.InterfaceIndex);
+
+            // This can throw ObjectDisposedException.
+            SocketError errorCode = Interop.Winsock.setsockopt(
+                handle,
+                SocketOptionLevel.IP,
+                optionName,
+                ref ipmr,
+                Interop.Winsock.IPSourceMulticastRequest.Size);
+
+            return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
+        }
+
+        public static SocketError SetIPv6SourceMulticastGroupOption(SafeSocketHandle handle, SocketOptionName optionName, SourceMulticastOption optionValue)
+        {
+            var ipmr = new Interop.Winsock.IPv6SourceMulticastRequest();
+
+            ipmr.MulticastAddress = new Interop.Winsock.SocketIPv6AddressStorage(optionValue.Group.GetAddressBytes());
+            ipmr.SourceAddress = new Interop.Winsock.SocketIPv6AddressStorage(optionValue.Source.GetAddressBytes());
+            ipmr.InterfaceIndex = unchecked((uint)optionValue.InterfaceIndex);
+
+            // This can throw ObjectDisposedException.
+            SocketError errorCode = Interop.Winsock.setsockopt(
+                handle,
+                SocketOptionLevel.IPv6,
+                optionName,
+                ref ipmr,
+                Interop.Winsock.IPv6SourceMulticastRequest.Size);
+
+            return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
+        }
+
         public static SocketError SetLingerOption(SafeSocketHandle handle, LingerOption optionValue)
         {
             Interop.Winsock.Linger lngopt = default;

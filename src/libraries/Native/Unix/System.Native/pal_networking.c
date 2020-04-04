@@ -1053,6 +1053,30 @@ static int8_t GetMulticastOptionName(int32_t multicastOption, int8_t isIPv6, int
             *optionName = isIPv6 ? IPV6_MULTICAST_IF : IP_MULTICAST_IF;
             return true;
 
+        case MulticastOption_MCAST_JOIN_GROUP:
+            *optionName = MCAST_JOIN_GROUP;
+            return true;
+
+        case MulticastOption_MCAST_LEAVE_GROUP:
+            *optionName = MCAST_LEAVE_GROUP;
+            return true;
+
+        case MulticastOption_MCAST_BLOCK_SOURCE:
+            *optionName = MCAST_BLOCK_SOURCE;
+            return true;
+
+        case MulticastOption_MCAST_UNBLOCK_SOURCE:
+            *optionName = MCAST_UNBLOCK_SOURCE;
+            return true;
+
+        case MulticastOption_MCAST_JOIN_SOURCE_GROUP:
+            *optionName = MCAST_JOIN_SOURCE_GROUP;
+            return true;
+
+        case MulticastOption_MCAST_LEAVE_SOURCE_GROUP:
+            *optionName = MCAST_LEAVE_SOURCE_GROUP;
+            return true;
+
         default:
             return false;
     }
@@ -1188,6 +1212,136 @@ int32_t SystemNative_SetIPv6MulticastOption(intptr_t socket, int32_t multicastOp
     ConvertByteArrayToIn6Addr(&opt.ipv6mr_multiaddr, &option->Address.Address[0], NUM_BYTES_IN_IPV6_ADDRESS);
 
     int err = setsockopt(fd, IPPROTO_IPV6, optionName, &opt, sizeof(opt));
+    return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
+int32_t SystemNative_SetIPv4MulticastGroupOption(intptr_t socket, int32_t multicastOption, struct IPv4MulticastGroupOption* option)
+{
+    if (option == NULL)
+    {
+        return Error_EFAULT;
+    }
+
+    int fd = ToFileDescriptor(socket);
+
+    int optionName;
+    if (!GetMulticastOptionName(multicastOption, 0, &optionName))
+    {
+        return Error_EINVAL;
+    }
+
+    struct group_req opt;
+    memset(&opt, 0, sizeof(struct group_req));
+
+    struct sockaddr_in g;
+    memset(&g, 0, sizeof(struct sockaddr_in));
+
+    g.sin_family = AF_INET;
+    g.sin_addr.s_addr = option->Group;
+    memcpy(&opt.gr_group, &g, sizeof(struct sockaddr_in));
+
+    opt.gr_interface = option->InterfaceIndex;
+
+    int err = setsockopt(fd, IPPROTO_IP, optionName, (char *)&opt, sizeof(opt));
+    return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
+int32_t SystemNative_SetIPv6MulticastGroupOption(intptr_t socket, int32_t multicastOption, struct IPv6MulticastGroupOption* option)
+{
+    if (option == NULL)
+    {
+        return Error_EFAULT;
+    }
+
+    int fd = ToFileDescriptor(socket);
+
+    int optionName;
+    if (!GetMulticastOptionName(multicastOption, 0, &optionName))
+    {
+        return Error_EINVAL;
+    }
+
+    struct group_req opt;
+    memset(&opt, 0, sizeof(struct group_req));
+
+    struct sockaddr_in6 g6;
+    memset(&g6, 0, sizeof(struct sockaddr_in6));
+
+    g6.sin6_family = AF_INET6;
+    ConvertByteArrayToIn6Addr(&g6.sin6_addr, &option->Group.Address[0], NUM_BYTES_IN_IPV6_ADDRESS);
+    memcpy(&opt.gr_group, &g6, sizeof(struct sockaddr_in6));
+
+    opt.gr_interface = option->InterfaceIndex;
+
+    int err = setsockopt(fd, IPPROTO_IPV6, optionName, (char *)&opt, sizeof(opt));
+    return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
+int32_t SystemNative_SetIPv4SourceMulticastGroupOption(intptr_t socket, int32_t multicastOption, struct IPv4SourceMulticastGroupOption* option)
+{
+    if (option == NULL)
+    {
+        return Error_EFAULT;
+    }
+
+    int fd = ToFileDescriptor(socket);
+
+    int optionName;
+    if (!GetMulticastOptionName(multicastOption, 0, &optionName))
+    {
+        return Error_EINVAL;
+    }
+
+    struct group_source_req opt;
+    memset(&opt, 0, sizeof(struct group_source_req));
+
+    struct sockaddr_in g;
+    memset(&g, 0, sizeof(struct sockaddr_in));
+
+    g.sin_family = AF_INET;
+    g.sin_addr.s_addr = option->Group;
+    memcpy(&opt.gsr_group, &g, sizeof(struct sockaddr_in));
+
+    g.sin_addr.s_addr = option->Source;
+    memcpy(&opt.gsr_source, &g, sizeof(struct sockaddr_in));
+
+    opt.gsr_interface = option->InterfaceIndex;
+
+    int err = setsockopt(fd, IPPROTO_IP, optionName, (char *)&opt, sizeof(opt));
+    return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
+int32_t SystemNative_SetIPv6SourceMulticastGroupOption(intptr_t socket, int32_t multicastOption, struct IPv6SourceMulticastGroupOption* option)
+{
+    if (option == NULL)
+    {
+        return Error_EFAULT;
+    }
+
+    int fd = ToFileDescriptor(socket);
+
+    int optionName;
+    if (!GetMulticastOptionName(multicastOption, 0, &optionName))
+    {
+        return Error_EINVAL;
+    }
+
+    struct group_source_req opt;
+    memset(&opt, 0, sizeof(struct group_source_req));
+
+    struct sockaddr_in6 g6;
+    memset(&g6, 0, sizeof(struct sockaddr_in6));
+
+    g6.sin6_family = AF_INET6;
+    ConvertByteArrayToIn6Addr(&g6.sin6_addr, &option->Group.Address[0], NUM_BYTES_IN_IPV6_ADDRESS);
+    memcpy(&opt.gsr_group, &g6, sizeof(struct sockaddr_in6));
+
+    ConvertByteArrayToIn6Addr(&g6.sin6_addr, &option->Source.Address[0], NUM_BYTES_IN_IPV6_ADDRESS);
+    memcpy(&opt.gsr_source, &g6, sizeof(struct sockaddr_in6));
+
+    opt.gsr_interface = option->InterfaceIndex;
+
+    int err = setsockopt(fd, IPPROTO_IPV6, optionName, (char *)&opt, sizeof(opt));
     return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 

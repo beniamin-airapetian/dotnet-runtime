@@ -172,4 +172,41 @@ namespace System.Net.Sockets
             }
         }
     }
+
+    public class SourceMulticastOption
+    {
+        private long _interfaceIndex;
+
+        public SourceMulticastOption(IPAddress group, IPAddress source)
+            : this(group, source, 0)
+        { }
+
+        public SourceMulticastOption(IPAddress group, IPAddress source, int ifindex)
+        {
+            Group = group;
+            Source = source;
+            InterfaceIndex = ifindex;
+        }
+
+        public IPAddress Group { get; }
+        public IPAddress Source { get; }
+
+        // Sets the interface index.
+        public long InterfaceIndex
+        {
+            get
+            {
+                return _interfaceIndex;
+            }
+            set
+            {
+                if (value < 0 || value > 0x00000000FFFFFFFF)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
+                _interfaceIndex = value;
+            }
+        }
+    }
 }

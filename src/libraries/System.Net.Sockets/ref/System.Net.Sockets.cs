@@ -69,6 +69,14 @@ namespace System.Net.Sockets
         public System.Net.IPAddress Group { get { throw null; } set { } }
         public long InterfaceIndex { get { throw null; } set { } }
     }
+    public partial class SourceMulticastOption
+    {
+        public SourceMulticastOption(System.Net.IPAddress group, System.Net.IPAddress source) { }
+        public SourceMulticastOption(System.Net.IPAddress group, System.Net.IPAddress source, int ifindex) { }
+        public System.Net.IPAddress Group { get { throw null; } }
+        public System.Net.IPAddress Source { get { throw null; } }
+        public long InterfaceIndex { get { throw null; } set { } }
+    }
     public partial class LingerOption
     {
         public LingerOption(bool enable, int seconds) { }

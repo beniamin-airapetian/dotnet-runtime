@@ -1279,6 +1279,109 @@ namespace System.Net.Sockets
             return GetErrorAndTrackSetting(handle, SocketOptionLevel.IPv6, optionName, err);
         }
 
+        public static unsafe SocketError SetIPMulticastGroupOption(SafeSocketHandle handle, SocketOptionName optionName, MulticastOption optionValue)
+        {
+            Debug.Assert(optionName == SocketOptionName.McastJoinGroup || optionName == SocketOptionName.McastLeaveGroup, $"Unexpected optionName={optionName}");
+
+            var optName = ConvertMulticastOption(optionName);
+
+            var opt = new Interop.Sys.IPv4MulticastGroupOption
+            {
+                Group = unchecked((uint)optionValue.Group.Address),
+                InterfaceIndex = (uint)optionValue.InterfaceIndex
+            };
+
+            Interop.Error err = Interop.Sys.SetIPv4MulticastGroupOption(handle, optName, &opt);
+
+            return GetErrorAndTrackSetting(handle, SocketOptionLevel.IP, optionName, err);
+        }
+
+        public static unsafe SocketError SetIPv6MulticastGroupOption(SafeSocketHandle handle, SocketOptionName optionName, IPv6MulticastOption optionValue)
+        {
+            Debug.Assert(optionName == SocketOptionName.McastJoinGroup || optionName == SocketOptionName.McastLeaveGroup, $"Unexpected optionName={optionName}");
+
+            var optName = ConvertMulticastOption(optionName);
+
+            var opt = new Interop.Sys.IPv6MulticastGroupOption
+            {
+                Group = optionValue.Group.GetNativeIPAddress(),
+                InterfaceIndex = unchecked((uint)optionValue.InterfaceIndex)
+            };
+
+            Interop.Error err = Interop.Sys.SetIPv6MulticastGroupOption(handle, optName, &opt);
+
+            return GetErrorAndTrackSetting(handle, SocketOptionLevel.IPv6, optionName, err);
+        }
+
+        public static unsafe SocketError SetIPSourceMulticastGroupOption(SafeSocketHandle handle, SocketOptionName optionName, SourceMulticastOption optionValue)
+        {
+            var isValidOptionName =
+                optionName == SocketOptionName.McastBlockSource
+                || optionName == SocketOptionName.McastUnblockSource
+                || optionName == SocketOptionName.McastJoinSourceGroup
+                || optionName == SocketOptionName.McastLeaveSourceGroup;
+
+            Debug.Assert(isValidOptionName, $"Unexpected optionName={optionName}");
+
+            var optName = ConvertMulticastOption(optionName);
+
+            var opt = new Interop.Sys.IPv4SourceMulticastGroupOption
+            {
+                Group = unchecked((uint)optionValue.Group.Address),
+                Source = unchecked((uint)optionValue.Source.Address),
+                InterfaceIndex = unchecked((uint)optionValue.InterfaceIndex)
+            };
+
+            Interop.Error err = Interop.Sys.SetIPv4SourceMulticastGroupOption(handle, optName, &opt);
+
+            return GetErrorAndTrackSetting(handle, SocketOptionLevel.IP, optionName, err);
+        }
+
+        public static unsafe SocketError SetIPv6SourceMulticastGroupOption(SafeSocketHandle handle, SocketOptionName optionName, SourceMulticastOption optionValue)
+        {
+            var isValidOptionName =
+                optionName == SocketOptionName.McastBlockSource
+                || optionName == SocketOptionName.McastUnblockSource
+                || optionName == SocketOptionName.McastJoinSourceGroup
+                || optionName == SocketOptionName.McastLeaveSourceGroup;
+
+            Debug.Assert(isValidOptionName, $"Unexpected optionName={optionName}");
+
+            var optName = ConvertMulticastOption(optionName);
+
+            var opt = new Interop.Sys.IPv6SourceMulticastGroupOption
+            {
+                Group = optionValue.Group.GetNativeIPAddress(),
+                Source = optionValue.Source.GetNativeIPAddress(),
+                InterfaceIndex = unchecked((uint)optionValue.InterfaceIndex)
+            };
+
+            Interop.Error err = Interop.Sys.SetIPv6SourceMulticastGroupOption(handle, optName, &opt);
+
+            return GetErrorAndTrackSetting(handle, SocketOptionLevel.IPv6, optionName, err);
+        }
+
+        private static Interop.Sys.MulticastOption ConvertMulticastOption(SocketOptionName optionName)
+        {
+            switch (optionName)
+            {
+                case SocketOptionName.McastJoinGroup:
+                    return Interop.Sys.MulticastOption.MCAST_JOIN_GROUP;
+                case SocketOptionName.McastLeaveGroup:
+                    return Interop.Sys.MulticastOption.MCAST_LEAVE_GROUP;
+                case SocketOptionName.McastBlockSource:
+                    return Interop.Sys.MulticastOption.MCAST_BLOCK_SOURCE;
+                case SocketOptionName.McastUnblockSource:
+                    return Interop.Sys.MulticastOption.MCAST_UNBLOCK_SOURCE;
+                case SocketOptionName.McastJoinSourceGroup:
+                    return Interop.Sys.MulticastOption.MCAST_JOIN_SOURCE_GROUP;
+                case SocketOptionName.McastLeaveSourceGroup:
+                    return Interop.Sys.MulticastOption.MCAST_LEAVE_SOURCE_GROUP;
+            }
+
+            throw new InvalidOperationException($"Unexpected optionName={optionName}");
+        }
+
         public static unsafe SocketError SetLingerOption(SafeSocketHandle handle, LingerOption optionValue)
         {
             var opt = new Interop.Sys.LingerOption {

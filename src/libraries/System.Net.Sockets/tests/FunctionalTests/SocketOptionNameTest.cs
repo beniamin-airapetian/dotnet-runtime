@@ -65,6 +65,101 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
+        public void SourceMulticastOption_IP_AddSourceMembership_SetAndGet()
+        {
+            int interfaceIndex = 0;
+            IPAddress groupIp = IPAddress.Parse("239.1.2.3");
+            IPAddress sourceIp = IPAddress.Loopback;
+
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                var optionValue = new SourceMulticastOption(groupIp, sourceIp, interfaceIndex);
+                socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddSourceMembership, optionValue);
+            }
+        }
+
+        [Fact]
+        public void MulticastOption_IP_McastJoinGroup_SetAndGet()
+        {
+            int interfaceIndex = 0;
+            IPAddress groupIp = IPAddress.Parse("239.1.2.3");
+
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                var optionValue = new MulticastOption(groupIp, interfaceIndex);
+                socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.McastJoinGroup, optionValue);
+            }
+        }
+
+        [Fact]
+        public void SourceMulticastOption_IP_McastJoinSourceGroup_SetAndGet()
+        {
+            int interfaceIndex = 0;
+            IPAddress groupIp = IPAddress.Parse("239.1.2.3");
+            IPAddress sourceIp = IPAddress.Loopback;
+
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                var optionValue = new SourceMulticastOption(groupIp, sourceIp, interfaceIndex);
+                socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.McastJoinSourceGroup, optionValue);
+            }
+        }
+
+        [Fact]
+        public void SourceMulticastOption_IPv6_AddMembership_SetAndGet()
+        {
+            int interfaceIndex = 0;
+            IPAddress groupIp = IPAddress.Parse("FF02::1");
+
+            using (Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            {
+                var optionValue = new IPv6MulticastOption(groupIp, interfaceIndex);
+                socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, optionValue);
+            }
+        }
+
+        [Fact]
+        public void SourceMulticastOption_IPv6_AddSourceMembership_SetAndGet()
+        {
+            int interfaceIndex = 0;
+            IPAddress groupIp = IPAddress.Parse("FF02::1");
+            IPAddress sourceIp = IPAddress.IPv6Loopback;
+
+            using (Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            {
+                var optionValue = new SourceMulticastOption(groupIp, sourceIp, interfaceIndex);
+                socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddSourceMembership, optionValue);
+            }
+        }
+
+        [Fact]
+        public void SourceMulticastOption_IPv6_McastJoinGroup_SetAndGet()
+        {
+            int interfaceIndex = 0;
+            IPAddress groupIp = IPAddress.Parse("FF02::1");
+
+            using (Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            {
+                var optionValue = new IPv6MulticastOption(groupIp, interfaceIndex);
+                socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.McastJoinGroup, optionValue);
+            }
+        }
+
+        [Fact]
+        public void SourceMulticastOption_IPv6_McastJoinSourceGroup_SetAndGet()
+        {
+            int interfaceIndex = 0;
+            IPAddress groupIp = IPAddress.Parse("FF02::1");
+            IPAddress sourceIp = IPAddress.IPv6Loopback;
+
+            using (Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            {
+                var optionValue = new SourceMulticastOption(groupIp, sourceIp, interfaceIndex);
+                socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.McastJoinSourceGroup, optionValue);
+            }
+        }
+
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Skip on Nano: https://github.com/dotnet/runtime/issues/26286
         public async Task MulticastInterface_Set_AnyInterface_Succeeds()
         {

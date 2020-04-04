@@ -14,7 +14,14 @@ internal static partial class Interop
         {
             MULTICAST_ADD = 0,
             MULTICAST_DROP = 1,
-            MULTICAST_IF = 2
+            MULTICAST_IF = 2,
+
+            MCAST_JOIN_GROUP = 7,
+            MCAST_LEAVE_GROUP = 8,
+            MCAST_BLOCK_SOURCE = 9,
+            MCAST_UNBLOCK_SOURCE = 10,
+            MCAST_JOIN_SOURCE_GROUP = 11,
+            MCAST_LEAVE_SOURCE_GROUP = 12,
         }
 
         internal struct IPv4MulticastOption
@@ -32,6 +39,35 @@ internal static partial class Interop
             private int _padding;
         }
 
+        internal struct IPv4MulticastGroupOption
+        {
+            public uint Group;
+            public uint InterfaceIndex;
+        }
+
+        internal struct IPv6MulticastGroupOption
+        {
+            public IPAddress Group;
+            public uint InterfaceIndex;
+            private int _padding;
+        }
+
+        internal struct IPv4SourceMulticastGroupOption
+        {
+            public uint Group;
+            public uint Source;
+            public uint InterfaceIndex;
+            private int _padding;
+        }
+
+        internal struct IPv6SourceMulticastGroupOption
+        {
+            public IPAddress Group;
+            public IPAddress Source;
+            public uint InterfaceIndex;
+            private int _padding;
+        }
+
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetIPv4MulticastOption")]
         internal static extern unsafe Error GetIPv4MulticastOption(SafeHandle socket, MulticastOption multicastOption, IPv4MulticastOption* option);
 
@@ -43,5 +79,17 @@ internal static partial class Interop
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_SetIPv6MulticastOption")]
         internal static extern unsafe Error SetIPv6MulticastOption(SafeHandle socket, MulticastOption multicastOption, IPv6MulticastOption* option);
+
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_SetIPv4MulticastGroupOption")]
+        internal static extern unsafe Error SetIPv4MulticastGroupOption(SafeHandle socket, MulticastOption multicastOption, IPv4MulticastGroupOption* option);
+
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_SetIPv6MulticastGroupOption")]
+        internal static extern unsafe Error SetIPv6MulticastGroupOption(SafeHandle socket, MulticastOption multicastOption, IPv6MulticastGroupOption* option);
+
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_SetIPv4SourceMulticastGroupOption")]
+        internal static extern unsafe Error SetIPv4SourceMulticastGroupOption(SafeHandle socket, MulticastOption multicastOption, IPv4SourceMulticastGroupOption* option);
+
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_SetIPv6SourceMulticastGroupOption")]
+        internal static extern unsafe Error SetIPv6SourceMulticastGroupOption(SafeHandle socket, MulticastOption multicastOption, IPv6SourceMulticastGroupOption* option);
     }
 }

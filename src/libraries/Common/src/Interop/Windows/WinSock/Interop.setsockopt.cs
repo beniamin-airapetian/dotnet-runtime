@@ -66,5 +66,37 @@ internal static partial class Interop
             [In] SocketOptionName optionName,
             [In] ref IPv6MulticastRequest mreq,
             [In] int optionLength);
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+            [In] SafeCloseSocket socketHandle,
+            [In] SocketOptionLevel optionLevel,
+            [In] SocketOptionName optionName,
+            [In] ref IPMulticastGroupRequest mreq,
+            [In] int optionLength);
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+            [In] SafeCloseSocket socketHandle,
+            [In] SocketOptionLevel optionLevel,
+            [In] SocketOptionName optionName,
+            [In] ref IPv6MulticastGroupRequest mreq,
+            [In] int optionLength);
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+            [In] SafeCloseSocket socketHandle,
+            [In] SocketOptionLevel optionLevel,
+            [In] SocketOptionName optionName,
+            [In] ref IPSourceMulticastRequest mreq,
+            [In] int optionLength);
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+            [In] SafeCloseSocket socketHandle,
+            [In] SocketOptionLevel optionLevel,
+            [In] SocketOptionName optionName,
+            [In] ref IPv6SourceMulticastRequest mreq,
+            [In] int optionLength);
     }
 }

@@ -105,7 +105,14 @@ typedef enum
 {
     MulticastOption_MULTICAST_ADD = 0,  // IP{,V6}_ADD_MEMBERSHIP
     MulticastOption_MULTICAST_DROP = 1, // IP{,V6}_DROP_MEMBERSHIP
-    MulticastOption_MULTICAST_IF = 2    // IP_MULTICAST_IF
+    MulticastOption_MULTICAST_IF = 2,   // IP_MULTICAST_IF
+
+    MulticastOption_MCAST_JOIN_GROUP = 7,           // Protocol agnostic MCAST_JOIN_GROUP
+    MulticastOption_MCAST_LEAVE_GROUP = 8,          // Protocol agnostic MCAST_LEAVE_GROUP
+    MulticastOption_MCAST_BLOCK_SOURCE = 9,         // Protocol agnostic MCAST_BLOCK_SOURCE
+    MulticastOption_MCAST_UNBLOCK_SOURCE = 10,      // Protocol agnostic MCAST_UNBLOCK_SOURCE
+    MulticastOption_MCAST_JOIN_SOURCE_GROUP = 11,   // Protocol agnostic MCAST_JOIN_SOURCE_GROUP
+    MulticastOption_MCAST_LEAVE_SOURCE_GROUP = 12,  // Protocol agnostic MCAST_LEAVE_SOURCE_GROUP
 } MulticastOption;
 
 /*
@@ -280,6 +287,35 @@ typedef struct
 
 typedef struct
 {
+	uint32_t Group;             // Multicast address
+	uint32_t InterfaceIndex;    // Interface index
+} IPv4MulticastGroupOption;
+
+typedef struct
+{
+	struct IPAddress Group;     // Multicast address
+	uint32_t InterfaceIndex;    // Interface index
+	int32_t _padding;           // Pad out to 8-byte alignment
+} IPv6MulticastGroupOption;
+
+typedef struct
+{
+	uint32_t Group;             // Multicast address
+	uint32_t Source;            // Source address
+	uint32_t InterfaceIndex;    // Interface index
+	int32_t _padding;           // Pad out to 8-byte alignment
+} IPv4SourceMulticastGroupOption;
+
+typedef struct
+{
+	struct IPAddress Group;     // Multicast address
+	struct IPAddress Source;    // Source address
+	uint32_t InterfaceIndex;    // Interface index
+	int32_t _padding;           // Pad out to 8-byte alignment
+} IPv6SourceMulticastGroupOption;
+
+typedef struct
+{
     int32_t OnOff;   // Non-zero to enable linger
     int32_t Seconds; // Number of seconds to linger for
 } LingerOption;
@@ -359,6 +395,14 @@ PALEXPORT int32_t SystemNative_SetIPv4MulticastOption(intptr_t socket, int32_t m
 PALEXPORT int32_t SystemNative_GetIPv6MulticastOption(intptr_t socket, int32_t multicastOption, IPv6MulticastOption* option);
 
 PALEXPORT int32_t SystemNative_SetIPv6MulticastOption(intptr_t socket, int32_t multicastOption, IPv6MulticastOption* option);
+
+PALEXPORT int32_t SystemNative_SetIPv4MulticastGroupOption(intptr_t socket, int32_t multicastOption, struct IPv4MulticastGroupOption* option);
+
+PALEXPORT int32_t SystemNative_SetIPv6MulticastGroupOption(intptr_t socket, int32_t multicastOption, struct IPv6MulticastGroupOption* option);
+
+PALEXPORT int32_t SystemNative_SetIPv4SourceMulticastGroupOption(intptr_t socket, int32_t multicastOption, struct IPv4SourceMulticastGroupOption* option);
+
+PALEXPORT int32_t SystemNative_SetIPv6SourceMulticastGroupOption(intptr_t socket, int32_t multicastOption, struct IPv6SourceMulticastGroupOption* option);
 
 PALEXPORT int32_t SystemNative_GetLingerOption(intptr_t socket, LingerOption* option);
 
